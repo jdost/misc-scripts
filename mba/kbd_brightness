@@ -1,0 +1,92 @@
+#!/bin/sh
+
+if [ $(pgrep -f keyboard-backlight|wc -l) -gt 3 ]; then
+	exit 0
+fi
+
+MAX=255
+NUM_STEPS=20
+STEP=$(( MAX/NUM_STEPS ))
+DEV='/sys/devices/platform/applesmc.768/leds/smc::kbd_backlight/brightness'
+
+DZEN="dzen2 -bg #333333 -fg #13AA13 -w 300 -h 15 -x 570 -y 900 -ta c -e 'onstart=uncollapse'"
+
+GDBAR_ARGS="-fg #EEEEEE -sw 3 -ss 1 -w 240 -h 11 -s o"
+
+draw_dzen() {
+   local pipe='/tmp/kbdpipe'
+
+   if [[ ! -e "$pipe" ]]; then
+      mkfifo "$pipe"
+      ($DZEN < "$pipe"; rm -f "$pipe") &
+   fi
+
+   (echo -n "KBD   "; echo $1 $(($MAX+10)) | gdbar $GDBAR_ARGS ; sleep 2) > $pipe
+}
+
+ceil() {
+	/usr/bin/bc -lq <<-EOF
+		define floor(x) {
+			auto os,xx;
+			os=scale;
+			scale=0
+			xx=x/1;if(xx>x)xx-=1
+			scale=os
+			return(xx)
+		}
+		-floor(-($*))
+	EOF
+}
+
+floor() {
+	/usr/bin/bc -lq <<-EOF
+		define floor(x) {
+			auto os,xx;
+			os=scale;
+			scale=0
+			xx=x/1;if(xx>x)xx-=1
+			scale=os
+			return(xx)
+		}
+		floor($*)
+	EOF
+}
+
+case "$1" in
+[0-9]*)
+	#NEW=$(floor "($1)^2*$MAX/100" )
+   NEW=$1
+	NEW=$(( (NEW<0)?0:NEW ))
+	NEW=$(( (NEW>MAX)?MAX:NEW ))
+	#NEW=$1
+	;;
+off)
+	NEW=0
+	;;
+on)
+	NEW=MAX
+	;;
+down)
+	OLD=$(cat $DEV)
+	NEW=$(( OLD-STEP ))
+	NEW=$(( (NEW<0)?0:NEW ))
+	;;
+up)
+	OLD=$(cat $DEV)
+	NEW=$(( OLD+STEP ))
+	NEW=$(( (NEW>MAX)?MAX:NEW ))
+	;;
+*)
+   echo "$0: adjust keyboard brightness
+   on -- turn brightness to the max
+   off -- turn off brightness
+   up -- increase brightness by $NUM_STEPS%
+   down -- decrease brightness by $NUM_STEPS%
+   [0-255] -- set brightness absolutely"
+   exit
+	;;
+esac
+
+#echo $1 $OLD $NEW >>~/blah
+echo $NEW | sudo tee $DEV &>/dev/null
+draw_dzen $NEW
