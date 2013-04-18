@@ -20,6 +20,13 @@ aur_get() {
 
 aur_update() {
    cd $HOME/.aur/
+   if [[ "$1" == "all" ]]; then
+      for f in *; do
+         aur_update $f
+         cd $HOME/.aur/
+      done
+      return 0
+   fi
    if [[ ! -d "$1" ]]; then
       echo "Package $1 is not already installed."
       return 1
