@@ -15,7 +15,9 @@ aur_get() {
    tar -xzf "$1.tar.gz"
    rm "$1.tar.gz"
    cd "$1"
-   makepkg
+   if makepkg > /dev/null; then
+      sudo pacman -U "$(ls -t --file-type | grep tar | head -1)"
+   fi
 }
 
 aur_update() {
@@ -33,7 +35,9 @@ aur_update() {
    fi
 
    cd "$1"
-   makepkg
+   if makepkg > /dev/null; then
+      sudo pacman -U "$(ls -t --file-type | grep tar | head -1)"
+   fi
 }
 
 if [[ -z "${1}" ]]; then
