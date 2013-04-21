@@ -82,7 +82,7 @@ import os.path
 import os
 import sys
 
-WALLPAPER = "~/.wallpapers/Current"
+WALLPAPER = "~/.wallpapers/Current" if len(sys.argv) < 2 else sys.argv[1]
 XCOLORS = "~/.config/X11/xcolors/"
 
 
