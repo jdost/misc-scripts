@@ -11,7 +11,7 @@ if [ -f $CURRENT ]; then
 fi
 
 WP_FILES=($WALLPAPER_FOLDER/*)
-RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]}]}"
+RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}"
 
 ln -s "$RANDOM_WP" $CURRENT
 
