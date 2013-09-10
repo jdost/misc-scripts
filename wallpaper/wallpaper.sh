@@ -15,6 +15,14 @@ if [ $# -gt 0 ]; then
    elif [ "$1" = "count" ]; then
       echo "Wallpaper Count: $(ls $WALLPAPER_FOLDER | grep jpg | wc -l)"
       exit 0
+   elif [ "$1" = "cron" ]; then
+      if [ -z "$(crontab -l | grep WALLPAPER_FOLDER)" ]; then
+         echo "Cronjob not set up..."
+         echo "  Edit your crontab with \`crontab -e\`"
+         echo "  And use this command: \"export DISPLAY=:0.0; export WALLPAPER_FOLDER=$WALLPAPER_FOLDER; $0\""
+      fi
+
+      exit 0
    fi
 fi
 
