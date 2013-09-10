@@ -4,6 +4,10 @@ if [ -z "$WALLPAPER_FOLDER" ]; then
    WALLPAPER_FOLDER=$HOME/.wallpapers
 fi
 
+if [ ! -d "$WALLPAPER_FOLDER" ]; then
+   mkdir -p "$WALLPAPER_FOLDER"
+fi
+
 if [ $# -gt 0 ]; then
    if [ "$1" = "update" ]; then
       $(dirname $(realpath $0))/imgur_update.py
