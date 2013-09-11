@@ -19,4 +19,4 @@ ln -s "$RANDOM_WP" $CURRENT
 #$HOME/.local/virtualenvs/playground/bin/python2 $COLOR_GEN "$RANDOM_WP"
 #xrdb -merge $XDG_CONFIG_HOME/X11/Xresources
 
-feh --bg-scale --no-fehbg $CURRENT
+feh --bg-fill --no-fehbg $CURRENT
