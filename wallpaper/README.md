@@ -2,17 +2,24 @@
 
 Requirements:
 - `feh`
-- the `color_gen.py` **should** be run in a virtualenv with the `requirements.txt`
-   installed on it
+- `python`
 
 ## `wallpaper.sh`
 
 Will randomly choose a wallpaper from the folder specified by `$WP_FOLDER` and
 a symlink to that wallpaper as `$CURRENT`.  Then will set the new picture as the
-desktop wallpaper using `feh`.  Also there is a call to run the below `color_gen.py`
-script to generate a terminal colorscheme against the image.
+desktop wallpaper using `feh`.  Can take a second argument to run the update script
+or give a count of images.
+
+## `imgur_update.py`
+
+This is a script that I use to "sync" my wallpaper collection between computers, it
+pulls the images contained in an imgur album I maintain and only pulls the images
+not already on the computer (does not currently delete).  Uses standard python
+libraries so no need for much containment.
 
 ## `color_gen.py`
+(This is no longer used, kept it around for reference)
 
 This is a script I have taken from: 
 http://charlesleifer.com/blog/using-python-and-k-means-to-find-the-dominant-colors-in-images/.

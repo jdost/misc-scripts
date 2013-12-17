@@ -38,6 +38,7 @@ class ListParser(HTMLParser):
 
 def get_img(url):
     fn = url.split('/')[-1]
+    url = url if url.startswith("http") else ("http:" + url)
     print "Downloading {} to {}".format(url, fn)
     urlretrieve(url, join(FOLDER, fn))
 
