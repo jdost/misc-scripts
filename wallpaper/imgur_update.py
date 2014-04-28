@@ -65,4 +65,5 @@ if __name__ == '__main__':
             del images[name]
 
     for url in images.values():
+        url = "http:" + url if not url.startswith("http") else url
         get_img(url)
