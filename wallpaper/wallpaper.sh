@@ -10,7 +10,10 @@ fi
 
 if [ $# -gt 0 ]; then
    if [ "$1" = "update" ]; then
-      $(dirname $(realpath $0))/imgur_update.py
+      $(dirname $(realpath $0))/grab_wallpapers.py
+      exit 0
+   elif [ "$1" = "upload" ]; then
+      $(dirname $(realpath $0))/upload.sh
       exit 0
    elif [ "$1" = "count" ]; then
       echo "Wallpaper Count: $(ls $WALLPAPER_FOLDER | grep jpg | wc -l)"
