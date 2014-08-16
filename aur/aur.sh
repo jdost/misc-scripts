@@ -1,7 +1,7 @@
 #!/bin/sh
 
 aur_get() {
-   cd $HOME/.aur/
+   cd ${AUR_HOME:-$HOME/.local/aur}
    if [[ -d "$1" ]]; then
       aur_update $1
       return
@@ -22,7 +22,7 @@ aur_get() {
 }
 
 aur_update() {
-   cd $HOME/.aur/
+   cd ${AUR_HOME:-$HOME/.local/aur}
    if [[ "$1" == "all" ]]; then
       for f in *; do
          aur_update $f

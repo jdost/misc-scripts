@@ -5,3 +5,7 @@ a way to install applications that are not part of the main repository.  They ar
 just standardized scripts to build applications from source.  I wrote this script
 set to quickly and easily install applications from the repository and update them
 with simple commands.
+
+## SETTINGS
+
+Define `$AUR_HOME` to override the default `~/.local/aur/` install folder
