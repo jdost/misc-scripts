@@ -8,17 +8,29 @@ if [ ! -d "$WALLPAPER_FOLDER" ]; then
    mkdir -p "$WALLPAPER_FOLDER"
 fi
 
-if [ $# -gt 0 ]; then
-   if [ "$1" = "update" ]; then
+case "$1" in
+   "-h"|"--help")
+      echo "wallpaper [action]"
+      echo "  update | up  -- Pull down latest wallpapers"
+      echo "  upload | add -- Put in URLs of wallpapers to get, end with Ctrl-D"
+      echo "  count  | c   -- Prints number of wallpapers on machine"
+      echo "  --help | -h  -- This help menu"
+      echo "  [Nothing]    -- manually updates current wallpaper"
+      exit 0
+      ;;
+   "update"|"up")
       $(dirname $(realpath $0))/grab_wallpapers.py
       exit 0
-   elif [ "$1" = "upload" ]; then
+      ;;
+   "upload"|"add")
       $(dirname $(realpath $0))/upload.sh
       exit 0
-   elif [ "$1" = "count" ]; then
+      ;;
+   "count"|"c")
       echo "Wallpaper Count: $(ls $WALLPAPER_FOLDER | grep jpg | wc -l)"
       exit 0
-   elif [ "$1" = "cron" ]; then
+      ;;
+   "cron")
       if [ -z "$(crontab -l | grep WALLPAPER_FOLDER)" ]; then
          echo "Cronjob not set up..."
          echo "  Edit your crontab with \`crontab -e\`"
@@ -26,8 +38,8 @@ if [ $# -gt 0 ]; then
       fi
 
       exit 0
-   fi
-fi
+      ;;
+esac
 
 CURRENT=$WALLPAPER_FOLDER/Current
 
