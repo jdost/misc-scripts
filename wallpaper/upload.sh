@@ -6,8 +6,8 @@ while read URL; do
    if [[ -z "$URLS" ]]; then
       URLS=$URL
    else
-      URLS="$URL\n$URLS"
+      URLS="$URL $URLS"
    fi
 done
 
-echo $URLS | ssh wallpapers "cat - >> drop/$HOSTNAME"
+echo $URLS | ssh wallpapers "sed \"s/ /\n/g\" >> drop/$HOSTNAME"
