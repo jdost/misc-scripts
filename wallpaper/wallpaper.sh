@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+LATEST=0
+
 if [ -z "$WALLPAPER_FOLDER" ]; then
    WALLPAPER_FOLDER=$HOME/.wallpapers
 fi
@@ -39,15 +41,24 @@ case "$1" in
 
       exit 0
       ;;
+   "latest"|"l")
+      LATEST=1
+      ;;
 esac
 
 CURRENT=$WALLPAPER_FOLDER/Current
 
-if [ -f $CURRENT ]; then
+if [ -h $CURRENT ]; then
    rm $CURRENT
 fi
 
-WP_FILES=($WALLPAPER_FOLDER/*)
+if [ $LATEST = "1" ]; then
+   LATEST_TS=$(ls -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 ".*" $7 }')
+   WP_FILES_RAW=$(ls -lt $WALLPAPER_FOLDER | grep -v "Current|total" | egrep $LATEST_TS | awk '{ print $9 }')
+   WP_FILES=(${=WP_FILES_RAW})
+else
+   WP_FILES=($WALLPAPER_FOLDER/*)
+fi
 RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}"
 
 ln -s "$RANDOM_WP" $CURRENT
