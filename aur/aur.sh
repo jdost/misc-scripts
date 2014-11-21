@@ -26,7 +26,7 @@ aur_update() {
    if [[ "$1" == "all" ]]; then
       for f in *; do
          aur_update $f
-         cd $HOME/.aur/
+         cd $HOME/.local/aur/
       done
       return 0
    fi

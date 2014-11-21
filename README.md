@@ -15,3 +15,5 @@ it out).
   options on my Macbook Air, aimed at use with my WM
 - [Customization](customization/README.md) - Scripts I have that are useful for 
   displaying information or showing off a setup for the customization community
+- [AUR](aur/README.md) - Script to install and build a package from the AUR via the
+  command line
