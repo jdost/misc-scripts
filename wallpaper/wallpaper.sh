@@ -16,6 +16,7 @@ case "$1" in
       echo "  update | up  -- Pull down latest wallpapers"
       echo "  upload | add -- Put in URLs of wallpapers to get, end with Ctrl-D"
       echo "  count  | c   -- Prints number of wallpapers on machine"
+      echo "  latest | l   -- Updates current wallpaper from latest batch"
       echo "  --help | -h  -- This help menu"
       echo "  [Nothing]    -- manually updates current wallpaper"
       exit 0
