@@ -1,5 +1,5 @@
 #!/bin/sh
 
-AUTH_SOCK=$(ps aux | grep "/tmp/$(tmux list-client | cut -d' ' -f2)" | grep "$(tmux list-clients | cut -d':' -f1 | cut -d'/' -f3-)" | grep "^$(id -u $(whoami))" | awk '{ print $2 }' |  xargs -I {} cat /proc/{}/environ | sed 's/\x0/\n/g' | grep "^SSH_AUTH_SOCK" | cut -d'=' -f2)
+AUTH_SOCK=$(ps aux | grep "$(echo $TMUX | cut -d'<' -f1)" | grep "$(tmux list-clients | cut -d':' -f1 | cut -d'/' -f3-)" | egrep "^($(id -u $(whoami))|$(whoami))" | awk '{ print $2 }' |  xargs -I {} cat /proc/{}/environ | sed 's/\x0/\n/g' | grep "^SSH_AUTH_SOCK" | cut -d'=' -f2)
 echo SSH_AUTH_SOCK=$AUTH_SOCK
 export SSH_AUTH_SOCK=$AUTH_SOCK
