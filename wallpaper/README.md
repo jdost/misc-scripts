@@ -19,8 +19,6 @@ not already on the computer (does not currently delete).  Uses standard python
 libraries so no need for much containment.
 
 ## `color_gen.py`
-(This is no longer used, kept it around for reference)
-
 This is a script I have taken from: 
 http://charlesleifer.com/blog/using-python-and-k-means-to-find-the-dominant-colors-in-images/.
 It takes the image located at `WALLPAPER` and generates a colorscheme using a k-means

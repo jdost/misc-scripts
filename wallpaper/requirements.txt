@@ -1,1 +1,2 @@
-PIL==1.1.7
+Pillow==2.6.1
+wsgiref==0.1.2

@@ -82,15 +82,15 @@ import os.path
 import os
 import sys
 
-WALLPAPER = "~/.wallpapers/Current" if len(sys.argv) < 2 else sys.argv[1]
+WALLPAPER_FOLDER = os.environ.get("WALLPAPER_FOLDER", "~/.wallpapers")
+WALLPAPER = WALLPAPER_FOLDER + "/Current" if len(sys.argv) < 2 else sys.argv[1]
 XCOLORS = "~/.config/X11/xcolors/"
 
 
 def set_file(src):
-    return
-    #symlink = os.path.join(XCOLORS, "Current")
-    #os.remove(symlink)
-    #os.symlink(src, symlink)
+    symlink = os.path.join(XCOLORS, "Current")
+    os.remove(symlink)
+    os.symlink(src, symlink)
 
 
 def fit(src, minv, maxv):

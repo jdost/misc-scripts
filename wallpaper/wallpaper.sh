@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 LATEST=0
+TERM=0
 
 if [ -z "$WALLPAPER_FOLDER" ]; then
    WALLPAPER_FOLDER=$HOME/.wallpapers
@@ -18,6 +19,7 @@ case "$1" in
       echo "  count  | c   -- Prints number of wallpapers on machine"
       echo "  latest | l   -- Updates current wallpaper from latest batch"
       echo "  --help | -h  -- This help menu"
+      echo "  color  | t   -- Update terminal colors"
       echo "  [Nothing]    -- manually updates current wallpaper"
       exit 0
       ;;
@@ -45,6 +47,9 @@ case "$1" in
    "latest"|"l")
       LATEST=1
       ;;
+   "color"|"t")
+      TERM=1
+      ;;
 esac
 
 CURRENT=$WALLPAPER_FOLDER/Current
@@ -64,9 +69,11 @@ RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}"
 
 ln -s "$RANDOM_WP" $CURRENT
 
-# generate/link the new colorscheme
-#COLOR_GEN=$HOME/.scripts/color_gen.py
-#$HOME/.local/virtualenvs/playground/bin/python2 $COLOR_GEN "$RANDOM_WP"
-#xrdb -merge $XDG_CONFIG_HOME/X11/Xresources
+if [ $TERM = "1" ]; then
+   COLOR_GEN=$(dirname $(realpath $0))/color_gen.py
+   $HOME/.local/virtualenvs/wallpaper/bin/python2 $COLOR_GEN "$RANDOM_WP"
+   xrdb -merge $XDG_CONFIG_HOME/X11/Xresources
+   $(dirname $(realpath $0))/load_colors.sh
+fi
 
 feh --bg-fill --no-fehbg $CURRENT
