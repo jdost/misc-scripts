@@ -7,13 +7,10 @@ aur_get() {
       return
    fi
 
-   ABBR=${1:0:2}
-   if ! wget "http://aur.archlinux.org/packages/$ABBR/$1/$1.tar.gz"; then
+   if ! git clone "https://aur.archlinux.org/$1.git"; then
       echo "Failed to retrieve package $1."
       return 1
    fi
-   tar -xzf "$1.tar.gz"
-   rm "$1.tar.gz"
    cd "$1"
    makepkg -si
    #if makepkg > /dev/null; then
@@ -36,6 +33,7 @@ aur_update() {
    fi
 
    cd "$1"
+   git pull
    makepkg -si
    #if makepkg > /dev/null; then
       #sudo pacman -U "$(ls -t --file-type | grep tar | head -1)"
