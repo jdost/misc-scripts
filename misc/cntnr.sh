@@ -217,9 +217,11 @@ HELPS+=(connect_usage)
 connect() {
    get_containers
    local target=""
+   local root=""
 
    while (( $# )); do
       case "$1" in
+         "-r") root="1" ;;
          *) target=$1 ;;
       esac
 
@@ -228,7 +230,11 @@ connect() {
 
    check_name $target
 
-   lxc-attach -n $target
+   if [[ -z "$root" ]]; then
+      lxc-console -n $target -t 0
+   else
+      lxc-attach -n $target
+   fi
 }
 # STOP
 close_usage() {
@@ -284,6 +290,33 @@ destroy() {
 
    lxc-destroy -n $target
 }
+# REBOOT
+reboot_usage() {
+   cat << EOF
+   r[eboot|estart] NAME
+
+      NAME is the name of the container to be rebooted
+
+EOF
+}
+HELPS+=(reboot_usage)
+
+reboot() {
+   get_containers
+   local target=""
+
+   while (( $# )); do
+      case "$1" in
+         *) target=$1 ;;
+      esac
+
+      shift
+   done
+
+   check_name $target
+
+   lxc-stop -r -n $target
+}
 
 if [[ "$SHOW_HELP" == "1" ]]; then
    usage
@@ -317,6 +350,10 @@ case "$1" in
    "delete"|"d")
       shift
       destroy $@
+      ;;
+   "restart"|"reboot"|"r")
+      shift
+      reboot $@
       ;;
    *) ;;
 esac
