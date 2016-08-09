@@ -59,8 +59,8 @@ if [ -h $CURRENT ]; then
 fi
 
 if [ $LATEST = "1" ]; then
-   LATEST_TS=$(ls -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 ".*" $7 }')
-   WP_FILES_RAW=$(ls -lt $WALLPAPER_FOLDER | grep -v "Current|total" | egrep $LATEST_TS | awk '{ print $9 }')
+   LATEST_TS=$(ls -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
+   WP_FILES_RAW=$(ls -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
    WP_FILES=(${=WP_FILES_RAW})
 else
    WP_FILES=($WALLPAPER_FOLDER/*)
