@@ -13,4 +13,7 @@ while read URL; do
    fi
 done
 
+echo ""
+echo "Uploading the urls, a local copy is stored in \`~/tmp\`..."
+
 echo $URLS | tee $HOME/tmp/$(date +%s).wall | ssh wallpapers "sed \"s/ /\n/g\" >> drop/$HOSTNAME-$(date +%s)"

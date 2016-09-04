@@ -39,7 +39,7 @@ case "$1" in
       if [ -z "$(crontab -l | grep WALLPAPER_FOLDER)" ]; then
          echo "Cronjob not set up..."
          echo "  Edit your crontab with \`crontab -e\`"
-         echo "  And use this command: \"export DISPLAY=:0.0; export WALLPAPER_FOLDER=$WALLPAPER_FOLDER; $0\""
+         echo "  And use this command: \"env DISPLAY=:0.0 WALLPAPER_FOLDER=$WALLPAPER_FOLDER $0\""
       fi
 
       exit 0
