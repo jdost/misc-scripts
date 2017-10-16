@@ -46,8 +46,22 @@ _ip() { hostname -i; }
 _directory() { echo $PWD; }
 _shell() { echo $SHELL; }
 _kernel() { uname -srmo; }
-python_version() { python --version 2>&1 | cut -d' ' -f2-; }
-ruby_version() { ruby --version | cut -d' ' -f2; }
+python_version() { 
+    if which python 2>/dev/null >/dev/null; then
+        python --version 2>&1 | cut -d' ' -f2- 
+    elif which python2 2>/dev/null >/dev/null; then
+        python2 --version 2>&1 | cut -d' ' -f2- 
+    else
+        echo 'uninstalled'
+    fi
+}
+ruby_version() { 
+    if which ruby 2>/dev/null >/dev/null; then
+        ruby --version | cut -d' ' -f2
+    else
+        echo 'uninstalled'
+    fi
+}
 
 venv_name() { echo $(basename ${VIRTUAL_ENV:-''}); }
 ssh_info() { echo ''; }

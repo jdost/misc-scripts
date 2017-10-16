@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+LS_BIN=/usr/bin/ls
+
 LATEST=0
 TERM=0
 
@@ -9,6 +11,8 @@ fi
 
 if [ ! -d "$WALLPAPER_FOLDER" ]; then
    mkdir -p "$WALLPAPER_FOLDER"
+elif [ -h "$WALLPAPER_FOLDER" ]; then
+   WALLPAPER_FOLDER=$(readlink -f "$WALLPAPER_FOLDER")
 fi
 
 case "$1" in
@@ -32,7 +36,7 @@ case "$1" in
       exit 0
       ;;
    "count"|"c")
-      echo "Wallpaper Count: $(ls $WALLPAPER_FOLDER | grep jpg | wc -l)"
+      echo "Wallpaper Count: $($LS_BIN $WALLPAPER_FOLDER | grep jpg | wc -l)"
       exit 0
       ;;
    "cron")
@@ -55,19 +59,19 @@ esac
 CURRENT=$WALLPAPER_FOLDER/Current
 
 if [ -h $CURRENT ]; then
-   rm $CURRENT
+   /usr/bin/rm $CURRENT
 fi
 
 if [ $LATEST = "1" ]; then
-   LATEST_TS=$(ls -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
-   WP_FILES_RAW=$(ls -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
+   LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
+   WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
    WP_FILES=(${=WP_FILES_RAW})
 else
    WP_FILES=($WALLPAPER_FOLDER/*)
 fi
 RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}"
 
-ln -s "$RANDOM_WP" $CURRENT
+/usr/bin/ln -s "$RANDOM_WP" $CURRENT
 
 if [ $TERM = "1" ]; then
    COLOR_GEN=$(dirname $(realpath $0))/color_gen.py
@@ -76,4 +80,4 @@ if [ $TERM = "1" ]; then
    $(dirname $(realpath $0))/load_colors.sh
 fi
 
-feh --bg-fill --no-fehbg $CURRENT
+/usr/bin/feh --bg-fill --no-fehbg $CURRENT
