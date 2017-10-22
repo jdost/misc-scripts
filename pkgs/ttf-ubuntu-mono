@@ -12,7 +12,7 @@ url="https://github.com/ryanoasis/nerd-fonts"
 depends=('fontconfig' 'xorg-font-utils')
 provides=('ttf-ubuntu-mono')
 source=("https://github.com/ryanoasis/nerd-fonts/releases/download/v${pkgver}/UbuntuMono.zip")
-sha256sums=('4ea6059b6ea6050e0a0fcdcde8d895037fbc882203ca3466ed7c755ee13b33f9')
+sha256sums=('fb423fa6f5d1b3143df0200d9c66147d9677bf825d4f49a5c6ea843a278b8f1e')
 
 package() {
    install -d "$pkgdir/usr/share/fonts/TTF/"

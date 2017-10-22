@@ -12,7 +12,7 @@ url="https://github.com/ryanoasis/nerd-fonts"
 depends=('fontconfig' 'xorg-font-utils')
 provides=('ttf-hack')
 source=("https://github.com/ryanoasis/nerd-fonts/releases/download/v${pkgver}/Hack.zip")
-sha256sums=('871d0fe5af2be15251de4e5e0542cc0c34c53eda23074602ee396c2f2d0e4ee7')
+sha256sums=('ceebc8767d79b774b631c56fec1082b008310b0c6e5bb4b8e8826027ec6db882')
 
 package() {
    install -d "$pkgdir/usr/share/fonts/TTF/"
