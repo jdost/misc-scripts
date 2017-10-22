@@ -4,6 +4,7 @@ LS_BIN=/usr/bin/ls
 
 LATEST=0
 TERM=0
+LS_BIN=/usr/bin/ls
 
 if [ -z "$WALLPAPER_FOLDER" ]; then
    WALLPAPER_FOLDER=$HOME/.wallpapers
@@ -63,8 +64,10 @@ if [ -h $CURRENT ]; then
 fi
 
 if [ $LATEST = "1" ]; then
-   LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
-   WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
+   #LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
+   #WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
+   LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | sed 's/\s\+/,/g' | cut -d',' -f6-8)
+   WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | sed 's/\s\+/,/g' | egrep $LATEST_TS | cut -d',' -f9)
    WP_FILES=(${=WP_FILES_RAW})
 else
    WP_FILES=($WALLPAPER_FOLDER/*)

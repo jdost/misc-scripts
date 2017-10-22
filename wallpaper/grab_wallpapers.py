@@ -7,7 +7,7 @@ import json
 
 FOLDER = getenv("WALLPAPER_FOLDER", join(getenv("HOME"), ".wallpapers"))
 URL_BASE = "http://wallpapers.jdost.us/{}"
-IMG_EXTS = map(lambda x: "." + x, ["jpg", "jpeg", "png", "gif"])
+IMG_EXT = ["." + ext for ext in ["jpg", "jpeg", "png", "gif"]]
 
 
 def get_img(url):
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         lambda x: (x, URL_BASE.format(x)), json.load(images_raw)))
 
     for wp in listdir(FOLDER):
-        if not any(map(lambda ext: wp.endswith(ext), IMG_EXTS)):
+        if not any([lambda ext: wp.endswith(ext) for ext in IMG_EXT]):
             continue
         if wp in images:
             del images[wp]
