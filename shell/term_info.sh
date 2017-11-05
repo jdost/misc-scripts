@@ -43,43 +43,33 @@ _uptime() { echo $(uptime -p | cut -d' ' -f2- | sed 's/ days,/d/' | sed 's/ hour
 _username() { echo $USER; }
 _hostname() { hostname; }
 _ip() { hostname -i; }
-_directory() { echo $PWD; }
+_directory() { echo $(echo $PWD | sed 's/$HOME/\~/'); }
 _shell() { echo $SHELL; }
 _kernel() { uname -srmo; }
-python_version() { 
+python_version() {
     if which python 2>/dev/null >/dev/null; then
-        python --version 2>&1 | cut -d' ' -f2- 
+        python --version 2>&1 | cut -d' ' -f2-
     elif which python2 2>/dev/null >/dev/null; then
-        python2 --version 2>&1 | cut -d' ' -f2- 
+        python2 --version 2>&1 | cut -d' ' -f2-
     else
         echo 'uninstalled'
     fi
 }
-ruby_version() { 
+ruby_version() {
     if which ruby 2>/dev/null >/dev/null; then
         ruby --version | cut -d' ' -f2
     else
         echo 'uninstalled'
     fi
 }
-
-venv_name() { echo $(basename ${VIRTUAL_ENV:-''}); }
-ssh_info() { echo ''; }
-
-tmux_name() { echo "$(tmux ls | grep attached | cut -d':' -f1)"; }
-tmux_info() { echo "$(tmux list-panes | wc -l) panes / $(tmux list-windows | wc -l) windows"; }
-
-ssh_info() { echo "$(echo $SSH_CONNECTION | cut -d' ' -f1-2 --output-delimiter=':')->$(echo $SSH_CONNECTION | cut -d' ' -f3-4 --output-delimiter=':')"; }
-
-#  if SSH: ssh info
-
+# Print basic system information
 echo ''
 echo -e "  $(light_green echo 'User:') $(blue _username)\t$(light_green echo 'Host:') $(blue _hostname)\t$(light_green echo 'Directory:') $(blue _directory)"
 echo -e "   $(light_green echo 'TTY:') $(blue _tty)\t$(light_green echo 'Jobs:') $(blue _jobs)   \t$(light_green echo 'Shell:') $(blue _shell)"
 echo -e "   $(light_green echo 'Time:') $(blue _time)\t\t$(light_green echo 'Uptime:') $(blue _uptime)"
 echo -e "   $(light_green echo 'Kernel:') $(blue _kernel)"
 echo -e "   $(pink echo 'Python:') $(light_grey python_version)\t\t$(pink echo 'Ruby:') $(light_grey ruby_version)"
-
+# Extended information
 NEW_LINE=''
 new_line() {
    if [[ -z "$NEW_LINE" ]]; then
@@ -87,20 +77,21 @@ new_line() {
       NEW_LINE=' '
    fi
 }
+# Minikube info
+kube_info() { echo "running $(kubectl get --no-headers pods | wc -l) pods / $(kubectl get --no-headers services | wc -l) services"; }
+if minikube status | grep cluster | cut -d' ' -f2 | grep "Running" > /dev/null; then
+   new_line
+   echo -e "  $(brown echo 'Kubernetes:') $(white kube_info)"
+fi
 # Python virtualenv
-if [[ ! -z $(venv_name) ]]; then
-   new_line
-   echo -e "  $(brown echo 'Virtual Env:') $(white venv_name)"
-fi
+venv_name() { echo $(basename ${VIRTUAL_ENV:-''}); }
+[[ ! -z $(venv_name) ]] && new_line && echo -e "  $(brown echo 'Virtual Env:') $(white venv_name)"
 # Active SSH connection
-if [[ ! -z "$SSH_CONNECTION" ]]; then
-   new_line
-   echo -e "  $(brown echo 'SSH:') $(white ssh_info)"
-fi
+ssh_info() { echo "$(echo $SSH_CONNECTION | cut -d' ' -f1-2 --output-delimiter=':')->$(echo $SSH_CONNECTION | cut -d' ' -f3-4 --output-delimiter=':')"; }
+[[ ! -z "$SSH_CONNECTION" ]] && new_line && echo -e "  $(brown echo 'SSH:') $(white ssh_info)"
 # Active Tmux session
-if [[ ! -z "$TMUX" ]]; then
-   new_line
-   echo -e "  $(brown echo 'Tmux:') $(white tmux_name) - $(white tmux_info)"
-fi
+tmux_name() { echo "$(tmux ls | grep attached | cut -d':' -f1)"; }
+tmux_info() { echo "$(tmux list-panes | wc -l) panes / $(tmux list-windows | wc -l) windows"; }
+[[ ! -z "$TMUX" ]] && new_line && echo -e "  $(brown echo 'Tmux:') $(white tmux_name) - $(white tmux_info)"
 
 echo ''
