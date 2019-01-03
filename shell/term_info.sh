@@ -62,13 +62,20 @@ ruby_version() {
         echo 'uninstalled'
     fi
 }
+docker_version() {
+    if which docker 2>/dev/null >/dev/null; then
+        docker --version | cut -d' ' -f3 | cut -d',' -f1
+    else
+        echo 'uninstalled'
+    fi
+}
 # Print basic system information
 echo ''
 echo -e "  $(light_green echo 'User:') $(blue _username)\t$(light_green echo 'Host:') $(blue _hostname)\t$(light_green echo 'Directory:') $(blue _directory)"
 echo -e "   $(light_green echo 'TTY:') $(blue _tty)\t$(light_green echo 'Jobs:') $(blue _jobs)   \t$(light_green echo 'Shell:') $(blue _shell)"
 echo -e "   $(light_green echo 'Time:') $(blue _time)\t\t$(light_green echo 'Uptime:') $(blue _uptime)"
 echo -e "   $(light_green echo 'Kernel:') $(blue _kernel)"
-echo -e "   $(pink echo 'Python:') $(light_grey python_version)\t\t$(pink echo 'Ruby:') $(light_grey ruby_version)"
+echo -e "   $(pink echo 'Python:') $(light_grey python_version)\t\t$(pink echo 'Docker:') $(light_grey docker_version)"
 # Extended information
 NEW_LINE=''
 new_line() {
@@ -78,9 +85,9 @@ new_line() {
    fi
 }
 # Minikube info
-kube_info() { echo "running $(kubectl get --no-headers pods | wc -l) pods / $(kubectl get --no-headers services | wc -l) services"; }
+kube_info() { echo "running $(kubectl get --no-headers pods 2> /dev/null | wc -l) pods / $(kubectl get --no-headers services | wc -l) services"; }
 if which minikube 2> /dev/null > /dev/null; then
-   if minikube status | grep cluster | cut -d' ' -f2 | grep "Running" > /dev/null; then
+   if minikube status | grep apiserver | cut -d' ' -f2 | grep "Running" > /dev/null; then
       new_line
       echo -e "  $(brown echo 'Kubernetes:') $(white kube_info)"
    fi
