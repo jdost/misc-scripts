@@ -1,0 +1,94 @@
+<html>
+   <head>
+      <title>Rename Document Scans</title>
+      <style>
+         body {
+            margin: 0;
+            padding: 0;
+         }
+         #name {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            color: #CCCCCC;
+            top: 0;
+            width: 100%;
+            font-size: 24px;
+            padding: 5px 0;
+            text-align: center;
+         }
+         form {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+            margin: 0;
+            padding: 10px 0;
+         }
+         form span {
+            color: #CCCCCC;
+            margin: 0 5px;
+         }
+         #rotate {
+            position: fixed;
+            width: 250px;
+            right: 0;
+            bottom: 0;
+            padding: 5px 20px;
+         }
+         #rotate form {
+            display: block;
+            position: relative;
+            float: right;
+            background: None;
+            width: 30px;
+            padding: 4px;
+         }
+         input {
+            display: inline;
+            margin: 10px 5px;
+         }
+         img {
+            width: 95%;
+            margin: 35px 2.5% 60px;
+         }
+      </style>
+   </head>
+   <body>
+      <div id="name">Original Name: {{ image.with_suffix('') }}</div>
+      <img src="/{{ src_folder }}/{{ image }}?{{ cache_buster }}" />
+      <form method="post">
+         <span>New Name:</span>
+         <input type="text" name="dst" placeholder="Category" style="width: 120px" list="options" autocomplete=off autofocus>
+         <span>/</span>
+         <input type="text" name="year" placeholder="Year" style="width: 80px">
+         <span>.</span>
+         <input type="text" name="name" placeholder="Document Name" style="width: 250px">
+         <input type="hidden" name="src" value="{{ image }}">
+         <input type="submit" style="display: none" />
+      </form>
+      <div id="rotate">
+         <form action="/transform" method="post">
+            <input type="hidden" name="src" value="{{ image }}">
+            <input type="hidden" name="angle" value="90">
+            <input type="submit" value="&#8630;">
+         </form>
+         <form action="/transform" method="post">
+            <input type="hidden" name="src" value="{{ image }}">
+            <input type="hidden" name="angle" value="180">
+            <input type="submit" value="&#8635;">
+         </form>
+         <form action="/transform" method="post">
+            <input type="hidden" name="src" value="{{ image }}">
+            <input type="hidden" name="angle" value="270">
+            <input type="submit" value="&#8631;">
+         </form>
+      </div>
+
+      <datalist id="options">
+      {% for option in options %}
+         <option>{{ option }}</option>
+      {% endfor %}
+      </datalist>
+   </body>
+</html>
