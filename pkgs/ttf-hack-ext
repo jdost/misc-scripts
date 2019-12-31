@@ -4,14 +4,14 @@ _pkgver_patch=0
 
 pkgname="ttf-hack-ext"
 pkgver=${_pkgver_major}.${_pkgver_minor}.${_pkgver_patch}
-pkgrel=2
+pkgrel=3
 pkgdesc='Extended version of the ttf-hack font with additional glyphs'
 arch=('any')
 license=()
 url="https://github.com/ryanoasis/nerd-fonts"
-depends=('fontconfig' 'xorg-font-utils')
+depends=('fontconfig' 'xorg-fonts-encodings' 'xorg-font-utils')
 provides=('ttf-hack')
-source=("https://github.com/ryanoasis/nerd-fonts/releases/download/v${pkgver}/Hack.zip")
+source=("${pkgname}-${pkgver}.zip::https://github.com/ryanoasis/nerd-fonts/releases/download/v${pkgver}/Hack.zip")
 sha256sums=('d1147483fd0310fa6bfce6799f47654e3f435010fdc709877b15a23f090ed41c')
 
 package() {
