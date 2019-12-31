@@ -86,11 +86,9 @@ new_line() {
 }
 # Minikube info
 kube_info() { echo "running $(kubectl get --no-headers pods 2> /dev/null | wc -l) pods / $(kubectl get --no-headers services | wc -l) services"; }
-if which minikube 2> /dev/null > /dev/null; then
-   if minikube status | grep apiserver | cut -d' ' -f2 | grep "Running" > /dev/null; then
-      new_line
-      echo -e "  $(brown echo 'Kubernetes:') $(white kube_info)"
-   fi
+if which minikube &>/dev/null && minikube status | grep apiserver | cut -d' ' -f2 | grep "Running" > /dev/null; then
+   new_line
+   echo -e "  $(brown echo 'Kubernetes:') $(white kube_info)"
 fi
 # Python virtualenv
 venv_name() { echo $(basename ${VIRTUAL_ENV:-''}); }
