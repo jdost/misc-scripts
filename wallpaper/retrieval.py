@@ -1,4 +1,10 @@
 #!/usr/bin/python
+""" A task execution script for migrating newly dropped in wallpaper images
+into the lookup file and download directory.  This is run on a cronjob that
+just migrates the random assortment of image URL lists in the drop folder and
+processes the images listed, this means cleaning up the names, downloading
+the images, and updating the index listing.
+"""
 import os
 import os.path as p
 from base64 import b64encode
