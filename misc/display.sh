@@ -1,18 +1,48 @@
 #!/bin/sh
 
+set -euo pipefail
+
 if [[ -z "$XAUTHORITY" ]]; then
-   export XAUTHORITY=$(ps -C Xorg -f --no-header | sed -n 's/.*-auth //;s/ -[^ ].*//; p')
+   # If there is no default XAUTHORITY, we need to determine the value
+   #  programmatically, this is often the case when this is triggered via something
+   #  like an acpi event or uevent
+   #
+   # `ps` - List the running root Xorg process, which includes auth file
+   #  `sed` - Trim all *but* the auth file listing
+   export XAUTHORITY=$(
+      ps -C Xorg -f --no-header \
+         | sed -n 's/.*-auth //;s/ -[^ ].*//; p'
+   )
 fi
 if [[ -z "$DISPLAY" ]]; then
-   displays=$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##')
-   export DISPLAY=":$displays.0"
+   # If there is no default DISPLAY, we need to determine the value programmatically
+   #
+   # `ls` - list all files in the X11 tmp directory, each corresponds to an x display
+   #  `sed` - Trim off the prefix and get just the display number
+   export DISPLAY=":$(
+      ls /tmp/.X11-unix/* \
+         | sed 's#/tmp/.X11-unix/X##'
+   )"
 fi
 
-BUILTIN_DISPLAY="eDP-1"
+BUILTIN_DISPLAY="eDP-1"  # Hardcoded display considered the internal
 EXTERNAL_DISPLAY=""
-CONNECTED_DISPLAYS=$(xrandr | grep " connected " | cut -d' ' -f1)
-ACTIVE_DISPLAYS=$(xrandr --listactivemonitors | tail -n +2 | awk '{ print $NF }')
-LID_STATE="$(cat /proc/acpi/button/lid/LID0/state | cut -d':' -f2 | sed -e 's/[ \t]*//')"
+# List all xrandr options and filter out those that are "connected"
+CONNECTED_DISPLAYS=$(
+   xrandr \
+      | grep " connected " \
+      | cut -d' ' -f1
+)
+ACTIVE_DISPLAYS=$(
+   xrandr --listactivemonitors \
+      | tail -n +2 \
+      | awk '{ print $NF }'
+)
+LID_STATE="$(
+   cat /proc/acpi/button/lid/LID0/state \
+      | cut -d':' -f2 \
+      | sed -e 's/[ \t]*//'
+)"
 ENABLED_OUTPUTS=()
 EDIDS=$(xrandr --props | awk 'BEGIN { current = ""; output = ""; }
 $2 == "connected" { output = $1; }
