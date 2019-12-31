@@ -1,86 +1,79 @@
 #!/bin/zsh
 
-LS_BIN=/usr/bin/ls
+set -euo pipefail
 
-LATEST=0
-TERM=0
-LS_BIN=/usr/bin/ls
-
-if [ -z "$WALLPAPER_FOLDER" ]; then
-   WALLPAPER_FOLDER=$HOME/.wallpapers
+# If running headless, grab the first available display, this is a bit naive but
+#  allows for things like cron tasks to still set wallpapers
+if [[ -z "${DISPLAY:-}" ]]; then
+   export DISPLAY=":$(
+      ls /tmp/.X11-unix/* \
+         | head -n1 \
+         | set 's#/tmp/.X11-unix/X##'
+   )"
 fi
 
-if [ ! -d "$WALLPAPER_FOLDER" ]; then
-   mkdir -p "$WALLPAPER_FOLDER"
-elif [ -h "$WALLPAPER_FOLDER" ]; then
+WALLPAPER_FOLDER="${WALLPAPER_FOLDER:-$HOME/.wallpapers}"
+[[ ! -d "$WALLPAPER_FOLDER" ]] && mkdir -p "$WALLPAPER_FOLDER"
+if [[ -h "$WALLPAPER_FOLDER" ]]; then
    WALLPAPER_FOLDER=$(readlink -f "$WALLPAPER_FOLDER")
 fi
 
-case "$1" in
+help() {
+   cat << HELP
+wallpaper [action]
+  --help | -h  -- This help menu
+  update | up  -- Pull down latest wallpapers
+  upload | add -- Put in URLs of wallpapers to get, end with Ctrl-D
+  count  | c   -- Prints number of wallpapers on machine
+  latest | l   -- Updates current wallpaper from latest batch
+  [Nothing]    -- Updates current wallpaper from random selection in whole collection
+HELP
+}
+
+case "${1:-}" in
    "-h"|"--help")
-      echo "wallpaper [action]"
-      echo "  update | up  -- Pull down latest wallpapers"
-      echo "  upload | add -- Put in URLs of wallpapers to get, end with Ctrl-D"
-      echo "  count  | c   -- Prints number of wallpapers on machine"
-      echo "  latest | l   -- Updates current wallpaper from latest batch"
-      echo "  --help | -h  -- This help menu"
-      echo "  color  | t   -- Update terminal colors"
-      echo "  [Nothing]    -- manually updates current wallpaper"
+      help
       exit 0
       ;;
    "update"|"up")
-      $(dirname $(realpath $0))/grab_wallpapers.py
-      exit 0
-      ;;
+      exec $(dirname $(realpath $0))/grab_wallpapers.py ;;
    "upload"|"add")
-      $(dirname $(realpath $0))/upload.sh
-      exit 0
-      ;;
+      exec $(dirname $(realpath $0))/upload.sh ;;
    "count"|"c")
-      echo "Wallpaper Count: $($LS_BIN $WALLPAPER_FOLDER | grep jpg | wc -l)"
-      exit 0
-      ;;
-   "cron")
-      if [ -z "$(crontab -l | grep WALLPAPER_FOLDER)" ]; then
-         echo "Cronjob not set up..."
-         echo "  Edit your crontab with \`crontab -e\`"
-         echo "  And use this command: \"env DISPLAY=:0.0 WALLPAPER_FOLDER=$WALLPAPER_FOLDER $0\""
-      fi
-
+      echo "Wallpaper Count: $(find $WALLPAPER_FOLDER/ -type f | wc -l)"
       exit 0
       ;;
    "latest"|"l")
-      LATEST=1
-      ;;
-   "color"|"t")
-      TERM=1
+      latest=1
       ;;
 esac
 
 CURRENT=$WALLPAPER_FOLDER/Current
+[[ -h $CURRENT ]] && rm $CURRENT
 
-if [ -h $CURRENT ]; then
-   /usr/bin/rm $CURRENT
-fi
-
-if [ $LATEST = "1" ]; then
-   #LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | awk '{ print $6 " " $7 }')
-   #WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | grep -v "Current|total" | awk '{ print $6 " " $7 " " $9 }' | egrep $LATEST_TS | awk '{ print $3 }')
-   LATEST_TS=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | head -1 | sed 's/\s\+/,/g' | cut -d',' -f6-8)
-   WP_FILES_RAW=$($LS_BIN -lt $WALLPAPER_FOLDER | egrep -v "Current|total" | sed 's/\s\+/,/g' | egrep $LATEST_TS | cut -d',' -f9)
+if [ "${latest:-0}" = "1" ]; then
+   # Get the files that were created in the latest batch of retrievals
+   #
+   # `find` - find files in the wallpaper folder created after (inclusive) a certain
+   #     date, format expected is `YYYY-MM-DD`
+   #   `stat` - output the human readable creation time for the file
+   #     `ls -t` - list contents sorted by time created
+   #     `head -1` - we only want the first result, i.e. the newest file
+   #   `awk` - only print out the first part, which is just the date (drops the
+   #        timestamp)
+   WP_FILES_RAW=$(
+      find $WALLPAPER_FOLDER -type f -newerct $(
+         stat -c %y $WALLPAPER_FOLDER/$(
+            \ls -t $WALLPAPER_FOLDER \
+               | head -1
+            ) | awk '{ print $1 }'
+         )
+      )
+   # Transform the listing into a native array
    WP_FILES=(${=WP_FILES_RAW})
 else
    WP_FILES=($WALLPAPER_FOLDER/*)
 fi
-RANDOM_WP="${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}"
 
-/usr/bin/ln -s "$RANDOM_WP" $CURRENT
-
-if [ $TERM = "1" ]; then
-   COLOR_GEN=$(dirname $(realpath $0))/color_gen.py
-   $HOME/.local/virtualenvs/wallpaper/bin/python2 $COLOR_GEN "$RANDOM_WP"
-   xrdb -merge $XDG_CONFIG_HOME/X11/Xresources
-   $(dirname $(realpath $0))/load_colors.sh
-fi
-
-/usr/bin/feh --bg-fill --no-fehbg $CURRENT
+ln -s "${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}" "$CURRENT"
+feh --bg-fill --no-fehbg "$CURRENT"
