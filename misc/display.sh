@@ -14,13 +14,14 @@ if [[ -z "$XAUTHORITY" ]]; then
          | sed -n 's/.*-auth //;s/ -[^ ].*//; p'
    )
 fi
-if [[ -z "$DISPLAY" ]]; then
+if [[ -z "${DISPLAY:-}" ]]; then
    # If there is no default DISPLAY, we need to determine the value programmatically
    #
    # `ls` - list all files in the X11 tmp directory, each corresponds to an x display
    #  `sed` - Trim off the prefix and get just the display number
    export DISPLAY=":$(
-      ls /tmp/.X11-unix/* \
+      \ls /tmp/.X11-unix/* \
+         | head -n1 \
          | sed 's#/tmp/.X11-unix/X##'
    )"
 fi

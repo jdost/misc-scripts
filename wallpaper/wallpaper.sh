@@ -6,9 +6,9 @@ set -euo pipefail
 #  allows for things like cron tasks to still set wallpapers
 if [[ -z "${DISPLAY:-}" ]]; then
    export DISPLAY=":$(
-      ls /tmp/.X11-unix/* \
+      \ls /tmp/.X11-unix/* \
          | head -n1 \
-         | set 's#/tmp/.X11-unix/X##'
+         | sed 's#/tmp/.X11-unix/X##'
    )"
 fi
 

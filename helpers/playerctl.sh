@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 # Helper wrapper for playerctl to better determine player targetting
 #   This is for when you have a long running player (like spotify) and start
 #   playing another audio source (like chromium) on top, this will detect that
@@ -35,7 +35,7 @@ if [[ -z "$TARGET_PLAYER" ]]; then
 fi
 
 # Useful debugging output to show what the wrappe *thinks* it should target
-if [[ "$1" == "get-active" ]]; then
+if [[ "${1:-}" == "get-active" ]]; then
    echo $TARGET_PLAYER
    exit 0
 fi

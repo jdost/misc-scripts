@@ -17,15 +17,15 @@ DEFAULT_TMUX=default
 
 _start () {
    local name=$1
-   $TMUX_BIN -S $TMUX_TMPDIR/$name new-session -s $name -d
-   chmod 777 $TMUX_TMPDIR/$name
+   $TMUX_BIN -L $name new-session -s $name -d
+   #chmod 777 $TMUX_TMPDIR/$name
    _attach $name
 }
 
 _attach () {
    local name=$1
    settitle "$name"
-   exec $TMUX_BIN -S $TMUX_TMPDIR/$name attach -t $name
+   exec $TMUX_BIN -L $name attach -t $name
 }
 
 _check_in_session () {
