@@ -5,75 +5,130 @@ set -euo pipefail
 # If running headless, grab the first available display, this is a bit naive but
 #  allows for things like cron tasks to still set wallpapers
 if [[ -z "${DISPLAY:-}" ]]; then
-   export DISPLAY=":$(
-      \ls /tmp/.X11-unix/* \
-         | head -n1 \
-         | sed 's#/tmp/.X11-unix/X##'
-   )"
+   export DISPLAY=":$(\ls /tmp/.X11-unix/* | head -n1 | sed 's#/tmp/.X11-unix/X##')"
 fi
 
-WALLPAPER_FOLDER="${WALLPAPER_FOLDER:-$HOME/.wallpapers}"
-[[ ! -d "$WALLPAPER_FOLDER" ]] && mkdir -p "$WALLPAPER_FOLDER"
-if [[ -h "$WALLPAPER_FOLDER" ]]; then
-   WALLPAPER_FOLDER=$(readlink -f "$WALLPAPER_FOLDER")
-fi
+ACTIVE_WALLPAPER="/tmp/wallpaper.$UID"
+FOLDER="${WALLPAPER_FOLDER:-$HOME/pictures/wallpaper}"
+[[ -h "$FOLDER" ]] && FOLDER=$(readlink -f "$FOLDER")
 
 help() {
    cat << HELP
 wallpaper [action]
-  --help | -h  -- This help menu
-  update | up  -- Pull down latest wallpapers
-  upload | add -- Put in URLs of wallpapers to get, end with Ctrl-D
-  count  | c   -- Prints number of wallpapers on machine
-  latest | l   -- Updates current wallpaper from latest batch
-  [Nothing]    -- Updates current wallpaper from random selection in whole collection
+  add       -- take remote image URLs from stdin and add them to the collection
+  count     -- informative output of size of current collection
+  info      -- output internal information for easy visibility
+  --latest  -- update image only from most recent batch of wallpapers
+  reset     -- sets the most recent wallpaper again, used for restarts
+  <default> -- update wallpaper with a random one from collection
 HELP
+}
+
+# _retrieve is an internal helper function for doing the actual retrieval of a single
+#   image URL.  It is meant to handle downloading the image, generating it's
+#   fingerprint, verifying the file is unique (i.e. not a different URL from another)
+#   and then properly storing it in the folder.
+#
+# This uses (and expects):
+#  - `curl` for downloading the image
+_retrieve() {
+   local src="$1"
+   local suffix="$(echo $src | rev | cut -d'.' -f1 | rev)"
+   local tmpfile="$(mktemp /tmp/wallpaper.XXXXX.$suffix)"
+   echo -n "Adding $src..."
+
+   curl --silent "$src" > $tmpfile
+
+   if which magick &>/dev/null; then
+      local id="$(magick convert $tmpfile -scale100x100 - | md5sum - | cut -c-8)"
+      local dst="$FOLDER/$id.jpg"
+      if [[ -e "$dst" ]]; then
+         echo "DUPLICATE"
+         return 1
+      else
+         magick convert $tmpfile $dst
+         echo "$id.jpg"
+      fi
+   else
+      local id=$(md5sum $tmpfile | cut -c-8)
+      local dst="$FOLDER/$id.$suffix"
+      if [[ -e "$dst" ]]; then
+         echo "DUPLICATE"
+         return 1
+      fi
+      cp $tmpfile "$dst"
+      echo "$id.$suffix"
+   fi
+   rm $tmpfile
+}
+
+retrieve() {
+   echo "Paste in a target URL per line, use Ctrl-D when finished..."
+   local total=0
+   while read url; do
+      if _retrieve $url; then
+         total=$((total+1))
+      fi
+   done
+
+   echo "Retrieved $total new wallpapers"
+}
+
+count() {
+   echo "Size of local collection: $(find $FOLDER -type f | wc -l)"
+}
+
+info() {
+   count
+}
+
+switch() {
+   case "${1:-all}" in
+      "latest")
+         # stat is used to output the date from the specified file
+         #   it takes the top entry in `ls -t` which is time sorted listing of the
+         #   folder, which should be the most recently added file
+         # awk is used to strip the timestamp and leave just the date as YYYY-MM-DD
+         local latest="$(stat -c %y $FOLDER/$(\ls -t $FOLDER | head -1) | awk '{ print $1 }')"
+         # find filtered on files created on the latest date, which should be the
+         #   most recent batch of images retrieved
+         local selection=(${=$(find $FOLDER -type f -newerct $latest)})
+         ;;
+      "all")
+         local selection=(${=$(find $FOLDER -type f)})
+         ;;
+   esac
+
+   [[ -h "$ACTIVE_WALLPAPER" ]] && rm "$ACTIVE_WALLPAPER"
+   local target="${selection[RANDOM % ${#selection[@]} + 1]}"
+   ln -s "$target" "$ACTIVE_WALLPAPER"
+   reset_current
+}
+
+reset_current() {
+   feh --bg-fill --no-fehbg "$ACTIVE_WALLPAPER"
 }
 
 case "${1:-}" in
    "-h"|"--help")
-      help
-      exit 0
+      help && exit 0
       ;;
-   "update"|"up")
-      exec $(dirname $(realpath $0))/grab_wallpapers.py ;;
-   "upload"|"add")
-      exec $(dirname $(realpath $0))/upload.sh ;;
+   "add"|"retrieve"|"up"|"upload")
+      retrieve
+      ;;
    "count"|"c")
-      echo "Wallpaper Count: $(find $WALLPAPER_FOLDER/ -type f | wc -l)"
-      exit 0
+      count
       ;;
-   "latest"|"l")
-      latest=1
+   "info"|"i")
+      info
+      ;;
+   "--latest")
+      switch latest
+      ;;
+   "reset")
+      reset_current
+      ;;
+   *)
+      switch
       ;;
 esac
-
-CURRENT=$WALLPAPER_FOLDER/Current
-[[ -h $CURRENT ]] && rm $CURRENT
-
-if [ "${latest:-0}" = "1" ]; then
-   # Get the files that were created in the latest batch of retrievals
-   #
-   # `find` - find files in the wallpaper folder created after (inclusive) a certain
-   #     date, format expected is `YYYY-MM-DD`
-   #   `stat` - output the human readable creation time for the file
-   #     `ls -t` - list contents sorted by time created
-   #     `head -1` - we only want the first result, i.e. the newest file
-   #   `awk` - only print out the first part, which is just the date (drops the
-   #        timestamp)
-   WP_FILES_RAW=$(
-      find $WALLPAPER_FOLDER -type f -newerct $(
-         stat -c %y $WALLPAPER_FOLDER/$(
-            \ls -t $WALLPAPER_FOLDER \
-               | head -1
-            ) | awk '{ print $1 }'
-         )
-      )
-   # Transform the listing into a native array
-   WP_FILES=(${=WP_FILES_RAW})
-else
-   WP_FILES=($WALLPAPER_FOLDER/*)
-fi
-
-ln -s "${WP_FILES[RANDOM % ${#WP_FILES[@]} + 1]}" "$CURRENT"
-feh --bg-fill --no-fehbg "$CURRENT"
