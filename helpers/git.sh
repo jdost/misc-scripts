@@ -14,9 +14,16 @@ case "${1:-}" in
       exec $GIT_BIN
       ;;
    "grep")
-      if [[ ! -z "$(which rg 2>/dev/null)" ]]; then
+      if which rg &>/dev/null; then
+         TOPLEVEL=""
+         if $GIT_BIN rev-parse --show-toplevel &>/dev/null; then
+            TOPLEVEL=$($GIT_BIN rev-parse --show-toplevel 2>/dev/null)
+         else
+            echo "fatal: not a git repository"
+            exit 1
+         fi
          shift # Remove the `grep` argument
-         exec rg "$@"
+         exec rg --ignore-file=$TOPLEVEL/.gitignore "$@"
       else
          exec $GIT_BIN "$@"
       fi

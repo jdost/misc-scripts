@@ -97,7 +97,7 @@ venv_name() { echo $(basename ${VIRTUAL_ENV:-''}); }
 ssh_info() { echo "$(echo $SSH_CONNECTION | cut -d' ' -f1-2 --output-delimiter=':')->$(echo $SSH_CONNECTION | cut -d' ' -f3-4 --output-delimiter=':')"; }
 [[ ! -z "$SSH_CONNECTION" ]] && new_line && echo -e "  $(brown echo 'SSH:') $(white ssh_info)"
 # Active Tmux session
-tmux_name() { echo "$(tmux ls | grep attached | cut -d':' -f1)"; }
+tmux_name() { echo $TMUX | cut -d',' -f1 | rev | cut -d'/' -f1 | rev; }
 tmux_info() { echo "$(tmux list-panes | wc -l) panes / $(tmux list-windows | wc -l) windows"; }
 [[ ! -z "$TMUX" ]] && new_line && echo -e "  $(brown echo 'Tmux:') $(white tmux_name) - $(white tmux_info)"
 

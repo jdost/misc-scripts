@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [[ -z "$XAUTHORITY" ]]; then
+if [[ -z "${XAUTHORITY:-}" ]]; then
    # If there is no default XAUTHORITY, we need to determine the value
    #  programmatically, this is often the case when this is triggered via something
    #  like an acpi event or uevent
@@ -13,7 +13,15 @@ if [[ -z "$XAUTHORITY" ]]; then
       ps -C Xorg -f --no-header \
          | sed -n 's/.*-auth //;s/ -[^ ].*//; p'
    )
+   if ! xauth nlist &>/dev/null; then
+      if [[ ! -e "${HOME:-}/.Xauthority" ]]; then
+         echo "Cannot determine a valid XAUTHORITY file"
+         exit 1
+      fi
+      export XAUTHORITY=${HOME:-}/.Xauthority
+   fi
 fi
+
 if [[ -z "${DISPLAY:-}" ]]; then
    # If there is no default DISPLAY, we need to determine the value programmatically
    #
@@ -185,5 +193,5 @@ for _DISPLAY in $CONNECTED_DISPLAYS; do
    fi
 done
 
-xdotool key super+q
-wallpaper
+which xdotool &>/dev/null && xdotool key super+q
+which wallpaper &>/dev/null && wallpaper

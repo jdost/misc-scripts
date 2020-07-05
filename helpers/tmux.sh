@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -euo pipefail
 # Resolve the underlying tmux binary
@@ -9,7 +9,7 @@ else
    TMUX_BIN=$(which tmux)
 fi
 
-TMUX_TMPDIR=/tmp/tmux
+TMUX_TMPDIR=/tmp/tmux-$UID
 DEFAULT_TMUX=default
 
 [[ ! -d "$TMUX_TMPDIR" ]] && mkdir -p "$TMUX_TMPDIR"
@@ -17,8 +17,10 @@ DEFAULT_TMUX=default
 
 _start () {
    local name=$1
-   $TMUX_BIN -L $name new-session -s $name -d
-   #chmod 777 $TMUX_TMPDIR/$name
+   if [[ ! -S "$TMUX_TMPDIR/$name" ]]; then
+      $TMUX_BIN -L $name new-session -s $name -d
+      #chmod 777 $TMUX_TMPDIR/$name
+   fi
    _attach $name
 }
 
