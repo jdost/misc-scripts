@@ -39,6 +39,12 @@ case "${1:-}" in
       [[ -d "$XDG_CONFIG_HOME/supervisord/config.d" ]] \
          && linkIfNot lock/screenlock.conf $XDG_CONFIG_HOME/supervisord/config.d/screenlock.conf
       ;;
+   "scrcpy")
+      pkginstall android-udev
+      # scrcpy AUR package
+      linkIfNot helpers/scrcpy.sh $USR_BIN/scrcpy
+      linkIfNot helpers/scrcpy.desktop $HOME/.local/share/applications/scrcpy.desktop
+      ;;
    "term")
       linkIfNot shell/settitle.sh $USR_BIN/settitle
       linkIfNot shell/term_info.sh $USR_BIN/term_info
