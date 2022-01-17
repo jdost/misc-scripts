@@ -111,6 +111,14 @@ def transform_image():
     return redirect(url_for('req'))
 
 
+@app.route('/delete', methods=['POST'])
+def delete_image():
+    img_path = UNSORTED_FOLDER / request.form['src']
+    print(f"Deleteing {img_path}...")
+    img_path.unlink()
+    return redirect(url_for('req'))
+
+
 if __name__ == "__main__":
     print(
         f"Serving on :5000 for documents in {UNSORTED_FOLDER} to be stored "
